@@ -1,12 +1,22 @@
-# Computer Architecture Assignment 4
+Problem 1 · Early Branch Resolution 
+wire bne_D = (instr_D[31:26] == 6'b000101);
+assign pc_src_D = branch_D &
+(bne_D ? ~(rd1_D == rd2_D)
+: (rd1_D == rd2_D));
+Convert the following instructions to hex machine code, and simulate using your pipelined MIPS datapath.
 
-5-stage pipelined MIPS datapath implementation for:
+To verify, the register addresses are: $t0 = 8, $t1 = 9, $t2 = 10
 
-1. Early branch resolution with `beq` and `bne`
-2. EX-stage and ID-stage data forwarding
-3. Pipeline stall and flush control
+Verify that $t2 never reaches 0x99.
 
-## Problems
+Problem 2 · Data Forwarding 
+2008000A // addi $t0, $0, 10
+20090005 // addi $t1, $0, 5
+1509FFFD // bne $t0, $t1, -3 (10 ≠ 5, taken — jump back to 0x0)
+200A0099 // addi $t2, $0, 0x99 (CANARY — must never execute)
+Convert the following instructions to hex machine code, and simulate using your pipelined MIPS datapath.
+
+To verify, the register addresses are: $t0 = 8, $t1 = 9, $t2 = 10, $t3 = 11
 
 ### Problem 1: Early Branch Resolution
 
