@@ -20,12 +20,23 @@ To verify, the register addresses are: $t0 = 8, $t1 = 9, $t2 = 10, $t3 = 11
 
 RegWrite = 쓸 거야?
 WriteReg = 어디에 쓸 거야?
+1. reg_write
 add $s0, $s1, $s2   // RegWrite = 1
 lw  $s0, 0($s1)     // RegWrite = 1
 sw  $s0, 0($s1)     // RegWrite = 0
 beq $s0, $s1, L     // RegWrite = 0
 레지스터에 안 쓰는 명령어는 forwarding할 필요가 없음
-write_reg_M != 5'd0 
+2. write_reg_M != 5'd0 
+00000은 항상 0이니까 쓰려고 해도 바꿀 수 없다
+3. write_reg_M == rs_E
+메모리 단계에서 쓰는 reg, EX에서 쓰는 reg가 같
+
+MEM이 WB보다 앞선 명령어니까 이후로 WB 
+add $s0, $s1, $s2
+sub $s0, $s3, $s4
+and $t0, $s0, $s5
+s0를 add, sub 둘다 만드니까 mem을 우선해서 사용
+A는 rs_E B는 rt_E를 똑같이 
 ### Problem 1: Early Branch Resolution
 
 ```text
