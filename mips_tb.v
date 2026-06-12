@@ -9,7 +9,9 @@ module mips_tb;
     integer i;
     integer failures;
     reg canary_seen;
-    reg forwarding_seen;
+    reg branch_taken_seen;
+    reg mem_forward_seen;
+    reg wb_forward_seen;
 
     mips uut (
         .clk(clk),
@@ -40,22 +42,28 @@ module mips_tb;
             clear_state;
             $readmemh("problem1.dat", uut.u_datapath.u_imem.ram, 0, 3);
             canary_seen = 0;
+            branch_taken_seen = 0;
             rst_n = 1;
 
             repeat (30) begin
                 @(negedge clk);
                 if (uut.u_datapath.u_reg_file.rf[10] == 32'h00000099)
                     canary_seen = 1;
+                if (uut.u_datapath.pc_src_D)
+                    branch_taken_seen = 1;
             end
 
             $display("  $t0 = 0x%08h", uut.u_datapath.u_reg_file.rf[8]);
             $display("  $t1 = 0x%08h", uut.u_datapath.u_reg_file.rf[9]);
             $display("  $t2 = 0x%08h", uut.u_datapath.u_reg_file.rf[10]);
-            if (canary_seen) begin
-                $display("  FAIL: $t2 reached 0x00000099");
+            if (canary_seen || !branch_taken_seen) begin
+                if (canary_seen)
+                    $display("  FAIL: $t2 reached 0x00000099");
+                if (!branch_taken_seen)
+                    $display("  FAIL: BNE was never taken");
                 failures = failures + 1;
             end else begin
-                $display("  PASS: $t2 never reached 0x00000099");
+                $display("  PASS: BNE taken and $t2 never reached 0x00000099");
             end
         end
     endtask
@@ -65,27 +73,31 @@ module mips_tb;
             $display("Problem 2: Data Forwarding");
             clear_state;
             $readmemh("problem2.dat", uut.u_datapath.u_imem.ram, 0, 7);
-            forwarding_seen = 0;
+            mem_forward_seen = 0;
+            wb_forward_seen = 0;
             rst_n = 1;
 
             repeat (15) begin
                 @(negedge clk);
-                if ((uut.forward_a_E != 2'b00) ||
-                    (uut.forward_b_E != 2'b00))
-                    forwarding_seen = 1;
+                if ((uut.forward_a_E == 2'b10) ||
+                    (uut.forward_b_E == 2'b10))
+                    mem_forward_seen = 1;
+                if ((uut.forward_a_E == 2'b01) ||
+                    (uut.forward_b_E == 2'b01))
+                    wb_forward_seen = 1;
             end
 
             $display("  $t0 = 0x%08h", uut.u_datapath.u_reg_file.rf[8]);
             $display("  $t1 = 0x%08h", uut.u_datapath.u_reg_file.rf[9]);
             $display("  $t2 = 0x%08h", uut.u_datapath.u_reg_file.rf[10]);
             $display("  $t3 = 0x%08h", uut.u_datapath.u_reg_file.rf[11]);
-            if (!forwarding_seen ||
+            if (!mem_forward_seen || !wb_forward_seen ||
                 uut.u_datapath.u_reg_file.rf[10] != 32'h00000003 ||
                 uut.u_datapath.u_reg_file.rf[11] != 32'hffffffff) begin
                 $display("  FAIL: forwarding result mismatch");
                 failures = failures + 1;
             end else begin
-                $display("  PASS: forwarding activated and results are correct");
+                $display("  PASS: MEM/WB forwarding activated and results are correct");
             end
         end
     endtask
