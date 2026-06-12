@@ -9,19 +9,19 @@ module main_decoder (
     output wire       reg_write,
     output wire [1:0] alu_op    
 );
-    reg [8:0] controls; 
+    reg [7:0] controls; 
     assign {reg_write, reg_dst, alu_src, branch, mem_write, mem_to_reg, alu_op} = controls;
     // Truth Table for Main Decoder
     // {reg_write, reg_dst, alu_src, branch, mem_write, mem_to_reg, alu_op}
     always @(*) begin
         case (opcode)
-            6'b000000: controls = 9'b1_1_0_0_0_0_10; // R-type
-            6'b100011: controls = 9'b1_0_1_0_0_1_00; // lw (Load Word)
-            6'b101011: controls = 9'b0_0_1_0_1_0_00; // sw (Store Word)
-            6'b000100: controls = 9'b0_0_0_1_0_0_01; // beq (Branch Equal)
-            6'b000101: controls = 9'b0_0_0_1_0_0_01; // bne (Branch Not Equal)
-            6'b001000: controls = 9'b1_0_1_0_0_0_00; // addi (Add Immediate)
-            default:   controls = 9'b0_0_0_0_0_0_00; 
+            6'b000000: controls = 8'b1_1_0_0_0_0_10; // R-type
+            6'b100011: controls = 8'b1_0_1_0_0_1_00; // lw (Load Word)
+            6'b101011: controls = 8'b0_0_1_0_1_0_00; // sw (Store Word)
+            6'b000100: controls = 8'b0_0_0_1_0_0_01; // beq (Branch Equal)
+            6'b000101: controls = 8'b0_0_0_1_0_0_01; // bne (Branch Not Equal)
+            6'b001000: controls = 8'b1_0_1_0_0_0_00; // addi (Add Immediate)
+            default:   controls = 8'b0_0_0_0_0_0_00; 
         endcase
     end
 endmodule
