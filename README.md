@@ -18,6 +18,14 @@ Convert the following instructions to hex machine code, and simulate using your 
 
 To verify, the register addresses are: $t0 = 8, $t1 = 9, $t2 = 10, $t3 = 11
 
+RegWrite = 쓸 거야?
+WriteReg = 어디에 쓸 거야?
+add $s0, $s1, $s2   // RegWrite = 1
+lw  $s0, 0($s1)     // RegWrite = 1
+sw  $s0, 0($s1)     // RegWrite = 0
+beq $s0, $s1, L     // RegWrite = 0
+레지스터에 안 쓰는 명령어는 forwarding할 필요가 없음
+write_reg_M != 5'd0 
 ### Problem 1: Early Branch Resolution
 
 ```text
